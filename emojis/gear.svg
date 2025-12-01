@@ -1,0 +1,12 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gearGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8E8E93;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#636366;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="url(#gearGrad)"/>
+  <path d="M32 18C24.268 18 18 24.268 18 32C18 39.732 24.268 46 32 46C39.732 46 46 39.732 46 32C46 24.268 39.732 18 32 18ZM32 20L33.5 23.5L37.5 23L36.5 27L40 29L37 31.5L38.5 35.5L34.5 35L33 38.5L30.5 35L26.5 35.5L28 31.5L25 29L28.5 27L27.5 23L31.5 23.5L32 20Z" fill="white" fill-opacity="0.9"/>
+  <circle cx="32" cy="32" r="6" fill="white" fill-opacity="0.9"/>
+  <circle cx="32" cy="32" r="3.5" fill="url(#gearGrad)"/>
+</svg>
