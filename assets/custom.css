@@ -298,6 +298,86 @@
     background-clip: text !important;
 }
 
+.theme-toggle {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    margin-left: 12px;
+}
+
+.theme-toggle:hover {
+    background: rgba(99, 102, 241, 0.12);
+    border-color: rgba(99, 102, 241, 0.3);
+    transform: scale(1.1);
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+.theme-icon-sun,
+.theme-icon-moon {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.theme-icon-sun {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+.theme-icon-moon {
+    opacity: 0;
+    transform: rotate(-180deg) scale(0.5);
+}
+
+body.dark-mode .theme-icon-sun {
+    opacity: 0;
+    transform: rotate(180deg) scale(0.5);
+}
+
+body.dark-mode .theme-icon-moon {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+body.light-mode {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f9fafb;
+    --text-primary: #1a1a1a;
+    --text-secondary: #555555;
+    --accent: #6366f1;
+    --border: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .navbar {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border-bottom-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+body.light-mode .project-featured {
+    background: rgba(0, 0, 0, 0.02) !important;
+}
+
+body.light-mode .service-card,
+body.light-mode .skill-card,
+body.light-mode .testimonial-card {
+    background: rgba(0, 0, 0, 0.03) !important;
+}
+
 @media (max-width: 768px) {
     .carousel-nav {
         gap: 16px;
@@ -310,5 +390,9 @@
     
     .project-featured {
         border-radius: 20px !important;
+    }
+    
+    .theme-toggle {
+        margin-left: 8px;
     }
 }
