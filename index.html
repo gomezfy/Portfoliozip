@@ -16,7 +16,7 @@
     <meta name="twitter:creator" content="@gomezfy_">
     
     <!-- Security Headers -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ws: wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ws: wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     
@@ -158,7 +158,7 @@
                                         <span>Rate limiting, CSRF protection, CSP headers</span>
                                     </div>
                                 </div>
-                                <a href="#contact" class="btn-primary">Solicitar Acesso →</a>
+                                <a href="https://emojisize.vertraweb.app/" target="_blank" class="btn-primary">Acessar Emoji Size →</a>
                             </div>
                         </div>
                     </div>
@@ -440,57 +440,6 @@
         </svg>
     </button>
     
-    <script>
-    (function() {
-        const track = document.querySelector('.carousel-track');
-        const slides = document.querySelectorAll('.carousel-slide');
-        const dots = document.querySelectorAll('.carousel-dots .dot');
-        const prevBtn = document.querySelector('.carousel-btn.prev');
-        const nextBtn = document.querySelector('.carousel-btn.next');
-        let currentSlide = 0;
-        
-        function goToSlide(index) {
-            if (index < 0) index = slides.length - 1;
-            if (index >= slides.length) index = 0;
-            
-            slides[currentSlide].classList.remove('active');
-            dots[currentSlide].classList.remove('active');
-            
-            currentSlide = index;
-            
-            track.style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
-            slides[currentSlide].classList.add('active');
-            dots[currentSlide].classList.add('active');
-        }
-        
-        prevBtn.addEventListener('click', function() {
-            goToSlide(currentSlide - 1);
-        });
-        
-        nextBtn.addEventListener('click', function() {
-            goToSlide(currentSlide + 1);
-        });
-        
-        dots.forEach(function(dot, index) {
-            dot.addEventListener('click', function() {
-                goToSlide(index);
-            });
-        });
-        
-        let startX = 0;
-        let endX = 0;
-        const carousel = document.querySelector('.carousel-container');
-        
-        carousel.addEventListener('touchstart', function(e) {
-            startX = e.touches[0].clientX;
-        });
-        
-        carousel.addEventListener('touchend', function(e) {
-            endX = e.changedTouches[0].clientX;
-            if (startX - endX > 50) goToSlide(currentSlide + 1);
-            if (endX - startX > 50) goToSlide(currentSlide - 1);
-        });
-    })();
-    </script>
+    <script src="/assets/carousel.js"></script>
 </body>
 </html>
