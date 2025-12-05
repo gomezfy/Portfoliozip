@@ -1,4 +1,4 @@
-modules = ["web", "nodejs-20", "python-3.11"]
+modules = ["nodejs-20", "web", "python-3.11"]
 [nix]
 channel = "stable-25_05"
 packages = ["unzip"]
@@ -50,6 +50,10 @@ externalPort = 3002
 [[ports]]
 localPort = 43097
 externalPort = 3001
+
+[[ports]]
+localPort = 45211
+externalPort = 4200
 
 [userenv]
 
