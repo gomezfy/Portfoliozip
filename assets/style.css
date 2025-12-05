@@ -996,21 +996,37 @@ img {
 }
 
 @media (max-width: 768px) {
+    .container {
+        padding: 0 16px;
+    }
+    
+    .nav-container {
+        padding: 0 16px;
+        height: 64px;
+    }
+    
     .nav-links {
         display: none;
-        position: absolute;
-        top: 72px;
+        position: fixed;
+        top: 64px;
         left: 0;
         right: 0;
-        background: var(--bg-primary);
-        border-bottom: 1px solid var(--border);
+        bottom: 0;
+        background: rgba(10, 10, 10, 0.98);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         flex-direction: column;
-        padding: 24px;
-        gap: 24px;
+        padding: 40px 24px;
+        gap: 32px;
+        z-index: 999;
     }
     
     .nav-links.active {
         display: flex;
+    }
+    
+    .nav-link {
+        font-size: 18px;
     }
     
     .nav-toggle {
@@ -1019,12 +1035,37 @@ img {
     
     .hero {
         min-height: auto;
-        padding: 100px 20px 60px;
+        padding: 90px 16px 50px;
+        gap: 40px;
+    }
+    
+    .hero-title {
+        font-size: 42px;
+        letter-spacing: -1px;
+    }
+    
+    .hero-description {
+        font-size: 16px;
     }
     
     .hero-stats {
         flex-wrap: wrap;
-        gap: 24px;
+        gap: 20px;
+        padding: 20px 0;
+    }
+    
+    .stat {
+        flex: 1;
+        min-width: 80px;
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+    }
+    
+    .stat-label {
+        font-size: 10px;
     }
     
     .stat-divider {
@@ -1033,27 +1074,80 @@ img {
     
     .hero-cta {
         flex-direction: column;
+        gap: 12px;
     }
     
     .btn {
         width: 100%;
+        padding: 16px 24px;
+    }
+    
+    .hero-terminal {
+        border-radius: 8px;
+    }
+    
+    .terminal-header {
+        padding: 12px 16px;
+    }
+    
+    .terminal-body {
+        padding: 16px;
+        font-size: 12px;
     }
     
     .terminal-output.code {
-        font-size: 10px;
+        font-size: 9px;
         overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
     }
     
     .section {
-        padding: 80px 0;
+        padding: 60px 0;
+    }
+    
+    .section-header {
+        margin-bottom: 40px;
     }
     
     .section-title {
         font-size: 24px;
     }
     
+    .about-lead {
+        font-size: 18px;
+    }
+    
+    .about-image {
+        max-width: 200px;
+        margin: 0 auto;
+    }
+    
     .projects-grid {
         grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .project-card {
+        padding: 24px;
+        gap: 16px;
+    }
+    
+    .project-name {
+        font-size: 18px;
+    }
+    
+    .project-description {
+        font-size: 14px;
+    }
+    
+    .project-tech {
+        gap: 6px;
+    }
+    
+    .project-tech span {
+        font-size: 10px;
+        padding: 4px 8px;
     }
     
     .timeline {
@@ -1061,12 +1155,21 @@ img {
     }
     
     .timeline::before {
-        left: 20px;
+        left: 15px;
+    }
+    
+    .timeline-item {
+        padding-bottom: 40px;
     }
     
     .timeline-marker {
         left: 0;
-        width: 40px;
+        width: 30px;
+    }
+    
+    .timeline-marker::before {
+        width: 10px;
+        height: 10px;
     }
     
     .marker-year {
@@ -1074,16 +1177,88 @@ img {
     }
     
     .timeline-content {
-        margin-left: 50px;
+        margin-left: 40px;
+        padding: 20px;
+    }
+    
+    .timeline-title {
+        font-size: 18px;
+    }
+    
+    .timeline-list li {
+        font-size: 14px;
     }
     
     .stack-grid {
         grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .stack-category {
+        padding: 20px;
+    }
+    
+    .contact-heading {
+        font-size: 24px;
+    }
+    
+    .contact-text {
+        font-size: 15px;
+    }
+    
+    .form-input {
+        padding: 14px;
+        font-size: 16px;
+    }
+    
+    .footer {
+        padding: 30px 0;
     }
     
     .footer-content {
         flex-direction: column;
-        gap: 16px;
+        gap: 12px;
         text-align: center;
+    }
+    
+    .footer-copy,
+    .footer-tagline {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 36px;
+    }
+    
+    .hero-status {
+        padding: 6px 12px;
+    }
+    
+    .status-text {
+        font-size: 10px;
+    }
+    
+    .stat-value {
+        font-size: 22px;
+    }
+    
+    .terminal-dots .dot {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .project-icon {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .section-number {
+        font-size: 12px;
+    }
+    
+    .section-title {
+        font-size: 22px;
     }
 }
