@@ -104,6 +104,21 @@
         osc.stop(audioCtx.currentTime + 0.6);
     }
     
+    function playFireballSound() {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.2);
+    }
+    
     const ship = {
         x: 10,
         y: canvas.height / 2 - 6,
@@ -117,6 +132,7 @@
     const enemies = [];
     const stars = [];
     const explosions = [];
+    const fireballs = [];
     let score = 0;
     let gameRunning = true;
     let loadingProgress = 0;
@@ -354,6 +370,27 @@
         ctx.fillRect(bullet.x + bullet.width - 2, bullet.y, 2, bullet.height);
     }
     
+    function drawFireball(fireball) {
+        const x = Math.floor(fireball.x);
+        const y = Math.floor(fireball.y);
+        
+        ctx.fillStyle = '#ff6600';
+        ctx.fillRect(x + 2, y + 1, 6, 6);
+        
+        ctx.fillStyle = '#ffff00';
+        ctx.fillRect(x + 4, y + 2, 3, 4);
+        
+        ctx.fillStyle = '#ff0000';
+        ctx.fillRect(x, y + 2, 2, 4);
+        ctx.fillRect(x + 8, y + 3, 2, 2);
+        
+        if (frame % 4 < 2) {
+            ctx.fillStyle = '#ff3300';
+            ctx.fillRect(x + 9, y + 2, 2, 1);
+            ctx.fillRect(x + 9, y + 5, 2, 1);
+        }
+    }
+    
     function drawHUD() {
         ctx.fillStyle = '#00ff00';
         ctx.font = '10px monospace';
@@ -486,6 +523,55 @@
                 boss.targetY = canvas.height / 2 + Math.sin(boss.phase) * (canvas.height / 3 - 30);
                 if (boss.y < boss.targetY) boss.y += 1;
                 else if (boss.y > boss.targetY) boss.y -= 1;
+                
+                boss.shootTimer++;
+                const shootInterval = Math.max(30, 60 - currentPhase * 5);
+                if (boss.shootTimer >= shootInterval) {
+                    boss.shootTimer = 0;
+                    playFireballSound();
+                    
+                    const fireballSpeed = 3 + currentPhase * 0.5;
+                    const patterns = currentPhase >= 3 ? 3 : currentPhase >= 2 ? 2 : 1;
+                    
+                    if (patterns === 1) {
+                        fireballs.push({
+                            x: boss.x,
+                            y: boss.y + boss.height / 2 - 4,
+                            width: 10,
+                            height: 8,
+                            speed: fireballSpeed,
+                            angle: 0
+                        });
+                    } else if (patterns === 2) {
+                        fireballs.push({
+                            x: boss.x,
+                            y: boss.y + boss.height / 3,
+                            width: 10,
+                            height: 8,
+                            speed: fireballSpeed,
+                            angle: -0.3
+                        });
+                        fireballs.push({
+                            x: boss.x,
+                            y: boss.y + boss.height * 2 / 3,
+                            width: 10,
+                            height: 8,
+                            speed: fireballSpeed,
+                            angle: 0.3
+                        });
+                    } else {
+                        for (let i = -1; i <= 1; i++) {
+                            fireballs.push({
+                                x: boss.x,
+                                y: boss.y + boss.height / 2 + i * 12,
+                                width: 10,
+                                height: 8,
+                                speed: fireballSpeed,
+                                angle: i * 0.25
+                            });
+                        }
+                    }
+                }
             }
             
             for (let i = bullets.length - 1; i >= 0; i--) {
@@ -506,6 +592,7 @@
                         }
                         playBossExplosionSound();
                         score += boss.points;
+                        fireballs.length = 0;
                         boss = null;
                         bossActive = false;
                         phaseTransition = true;
@@ -518,6 +605,25 @@
                 ship.x + ship.width > boss.x &&
                 ship.y < boss.y + boss.height &&
                 ship.y + ship.height > boss.y) {
+                createExplosion(ship.x + ship.width / 2, ship.y + ship.height / 2);
+                playerDied();
+                return;
+            }
+        }
+        
+        for (let i = fireballs.length - 1; i >= 0; i--) {
+            fireballs[i].x -= fireballs[i].speed;
+            fireballs[i].y += fireballs[i].angle * fireballs[i].speed;
+            
+            if (fireballs[i].x < -20 || fireballs[i].y < -20 || fireballs[i].y > canvas.height + 20) {
+                fireballs.splice(i, 1);
+                continue;
+            }
+            
+            if (ship.x < fireballs[i].x + fireballs[i].width &&
+                ship.x + ship.width > fireballs[i].x &&
+                ship.y < fireballs[i].y + fireballs[i].height &&
+                ship.y + ship.height > fireballs[i].y) {
                 createExplosion(ship.x + ship.width / 2, ship.y + ship.height / 2);
                 playerDied();
                 return;
@@ -546,7 +652,9 @@
             }
         }
         
-        if (frame % 60 === 0 || (frame % 40 === 0 && score > 50)) {
+        const baseSpawnRate = Math.max(25, 60 - currentPhase * 8);
+        const fastSpawnRate = Math.max(15, 40 - currentPhase * 5);
+        if (frame % baseSpawnRate === 0 || (frame % fastSpawnRate === 0 && currentPhase >= 2)) {
             spawnEnemy();
         }
     }
@@ -639,6 +747,8 @@
         if (boss) {
             drawBoss();
         }
+        
+        fireballs.forEach(drawFireball);
         
         explosions.forEach(drawExplosion);
         
