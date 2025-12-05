@@ -60,6 +60,19 @@
     letter-spacing: 2px;
 }
 
+.loading-hint.mobile-hint {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .loading-hint.pc-hint {
+        display: none;
+    }
+    .loading-hint.mobile-hint {
+        display: block;
+    }
+}
+
 :root {
     --bg-primary: #0a0a0a;
     --bg-secondary: #111111;

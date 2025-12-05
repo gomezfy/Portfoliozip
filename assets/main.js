@@ -468,10 +468,84 @@
     });
     
     let lastTouchY = null;
+    let mobileUp = false;
+    let mobileDown = false;
+    let mobileFireInterval = null;
+    
+    if (isMobile) {
+        createMobileControls();
+    }
+    
+    function createMobileControls() {
+        const controlsContainer = document.createElement('div');
+        controlsContainer.id = 'mobile-controls';
+        controlsContainer.style.cssText = `
+            position: fixed; bottom: 20px; left: 0; right: 0;
+            display: flex; justify-content: space-between; padding: 0 20px;
+            z-index: 1000; pointer-events: none;
+        `;
+        
+        const leftControls = document.createElement('div');
+        leftControls.style.cssText = 'display: flex; flex-direction: column; gap: 10px; pointer-events: auto;';
+        
+        const btnUp = document.createElement('button');
+        btnUp.innerHTML = '&#9650;';
+        btnUp.style.cssText = `
+            width: 60px; height: 60px; font-size: 24px; border-radius: 50%;
+            background: rgba(0, 255, 0, 0.3); border: 2px solid #00ff00;
+            color: #00ff00; touch-action: manipulation; user-select: none;
+        `;
+        
+        const btnDown = document.createElement('button');
+        btnDown.innerHTML = '&#9660;';
+        btnDown.style.cssText = btnUp.style.cssText;
+        
+        const rightControls = document.createElement('div');
+        rightControls.style.cssText = 'display: flex; align-items: center; pointer-events: auto;';
+        
+        const btnFire = document.createElement('button');
+        btnFire.innerHTML = 'FIRE';
+        btnFire.style.cssText = `
+            width: 80px; height: 80px; font-size: 16px; border-radius: 50%;
+            background: rgba(255, 0, 0, 0.3); border: 3px solid #ff0000;
+            color: #ff0000; font-weight: bold; touch-action: manipulation; user-select: none;
+        `;
+        
+        btnUp.addEventListener('touchstart', (e) => { e.preventDefault(); initAudio(); mobileUp = true; });
+        btnUp.addEventListener('touchend', (e) => { e.preventDefault(); mobileUp = false; });
+        btnUp.addEventListener('touchcancel', () => { mobileUp = false; });
+        
+        btnDown.addEventListener('touchstart', (e) => { e.preventDefault(); initAudio(); mobileDown = true; });
+        btnDown.addEventListener('touchend', (e) => { e.preventDefault(); mobileDown = false; });
+        btnDown.addEventListener('touchcancel', () => { mobileDown = false; });
+        
+        btnFire.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            initAudio();
+            shoot();
+            mobileFireInterval = setInterval(() => { if (gameRunning) shoot(); }, 200);
+        });
+        btnFire.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (mobileFireInterval) { clearInterval(mobileFireInterval); mobileFireInterval = null; }
+        });
+        btnFire.addEventListener('touchcancel', () => {
+            if (mobileFireInterval) { clearInterval(mobileFireInterval); mobileFireInterval = null; }
+        });
+        
+        leftControls.appendChild(btnUp);
+        leftControls.appendChild(btnDown);
+        rightControls.appendChild(btnFire);
+        
+        controlsContainer.appendChild(leftControls);
+        controlsContainer.appendChild(rightControls);
+        
+        loadingScreen.appendChild(controlsContainer);
+    }
+    
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
         lastTouchY = e.touches[0].clientY;
-        shoot();
     });
     
     canvas.addEventListener('touchmove', (e) => {
@@ -489,12 +563,12 @@
     });
     
     canvas.addEventListener('click', () => {
-        shoot();
+        if (!isMobile) shoot();
     });
     
     setInterval(() => {
-        if (keys['ArrowUp'] || keys['w']) ship.direction = -1;
-        else if (keys['ArrowDown'] || keys['s']) ship.direction = 1;
+        if (keys['ArrowUp'] || keys['w'] || mobileUp) ship.direction = -1;
+        else if (keys['ArrowDown'] || keys['s'] || mobileDown) ship.direction = 1;
         else ship.direction = 0;
     }, 16);
     
