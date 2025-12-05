@@ -1011,5 +1011,130 @@
         });
 
         console.log('Portfolio loaded successfully');
+        
+        initTranslation();
+    }
+    
+    const translations = {
+        'pt-br': {
+            'game.mobileHint': 'Use os botões para jogar!',
+            'nav.about': 'sobre',
+            'nav.projects': 'projetos',
+            'nav.experience': 'experiência',
+            'nav.stack': 'stack',
+            'nav.contact': 'contato',
+            'hero.status': 'Disponível para projetos',
+            'hero.description': 'Construindo soluções digitais de alta performance com arquitetura limpa. Especializado em aplicações web escaláveis, APIs robustas e integrações complexas.',
+            'hero.yearsExp': 'Anos de Experiência',
+            'hero.projects': 'Projetos Entregues',
+            'hero.uptime': 'Uptime',
+            'hero.viewProjects': 'Ver Projetos',
+            'hero.getInTouch': 'Entre em Contato',
+            'about.lead': 'Sou um engenheiro de software apaixonado por criar produtos que fazem a diferença. Com mais de 8 anos de experiência, já trabalhei em tudo, desde servidores de jogos até aplicações empresariais.',
+            'about.p1': 'Minha abordagem combina princípios de código limpo com soluções pragmáticas. Acredito em entregar rápido, iterar constantemente e sempre manter o usuário final em foco.',
+            'about.p2': 'Atualmente focado em desenvolvimento full-stack com TypeScript, React e Node.js. Estou sempre explorando novas tecnologias e metodologias para entregar melhores resultados.',
+            'about.location': 'Baseado no Brasil',
+            'projects.featured': 'Destaque',
+            'projects.production': 'Produção',
+            'projects.inDev': 'Em Desenvolvimento',
+            'projects.sheriffDesc': 'Bot avançado para Discord com tema western, economia dual, jogos de apostas, mineração cooperativa, sistema de recompensas e integração com IA. Suporta 4 idiomas com 73+ comandos em 14 categorias.',
+            'projects.emojiDesc': 'Aplicação web para redimensionar imagens e criar emojis perfeitos. Recursos de arrastar e soltar, preview em tempo real, downloads em ZIP e autenticação OAuth.',
+            'projects.orbitalDesc': 'Dashboard web moderno para monitorar e gerenciar bots do Discord. Estatísticas em tempo real, gerenciamento de servidores, configuração de comandos e logs de atividade.',
+            'projects.addDiscord': 'Adicionar ao Discord',
+            'projects.visitSite': 'Visitar Site',
+            'projects.comingSoon': 'Em Breve',
+            'stack.title': 'Tech Stack',
+            'contact.heading': 'Vamos construir algo incrível juntos.',
+            'contact.text': 'Tem um projeto em mente? Estou sempre aberto a discutir novas oportunidades e ideias interessantes. Vamos conversar sobre como posso ajudar a dar vida à sua visão.',
+            'contact.name': 'Nome',
+            'contact.namePlaceholder': 'Seu nome',
+            'contact.message': 'Mensagem',
+            'contact.messagePlaceholder': 'Conte-me sobre seu projeto...',
+            'contact.send': 'Enviar Mensagem',
+            'footer.copy': '© 2025 FarleYDev. Todos os direitos reservados.',
+            'footer.tagline': 'Construído com precisão.'
+        },
+        'en-us': {
+            'game.mobileHint': 'Use buttons to play!',
+            'nav.about': 'about',
+            'nav.projects': 'projects',
+            'nav.experience': 'experience',
+            'nav.stack': 'stack',
+            'nav.contact': 'contact',
+            'hero.status': 'Available for projects',
+            'hero.description': 'Building high-performance digital solutions with clean architecture. Specialized in scalable web applications, robust APIs, and complex integrations.',
+            'hero.yearsExp': 'Years Experience',
+            'hero.projects': 'Projects Delivered',
+            'hero.uptime': 'Uptime',
+            'hero.viewProjects': 'View Projects',
+            'hero.getInTouch': 'Get in Touch',
+            'about.lead': "I'm a software engineer passionate about building products that make a difference. With over 8 years of experience, I've worked on everything from game servers to enterprise applications.",
+            'about.p1': 'My approach combines clean code principles with pragmatic solutions. I believe in shipping fast, iterating quickly, and always keeping the end-user in focus.',
+            'about.p2': "Currently focused on full-stack development with TypeScript, React, and Node.js. I'm always exploring new technologies and methodologies to deliver better results.",
+            'about.location': 'Based in Brazil',
+            'projects.featured': 'Featured',
+            'projects.production': 'Production',
+            'projects.inDev': 'In Development',
+            'projects.sheriffDesc': 'Advanced Discord bot with western theme featuring dual-currency economy, gambling games, cooperative mining, bounty hunting system, and AI integration. Supports 4 languages with 73+ commands across 14 categories.',
+            'projects.emojiDesc': 'Web application for resizing images and creating perfect emojis. Features drag & drop, real-time preview, ZIP downloads, and OAuth authentication.',
+            'projects.orbitalDesc': 'Modern web dashboard for monitoring and managing Discord bots. Real-time statistics, server management, command configuration, and activity logs.',
+            'projects.addDiscord': 'Add to Discord',
+            'projects.visitSite': 'Visit Site',
+            'projects.comingSoon': 'Coming Soon',
+            'stack.title': 'Tech Stack',
+            'contact.heading': "Let's build something great together.",
+            'contact.text': "Have a project in mind? I'm always open to discussing new opportunities and interesting ideas. Let's talk about how I can help bring your vision to life.",
+            'contact.name': 'Name',
+            'contact.namePlaceholder': 'Your name',
+            'contact.message': 'Message',
+            'contact.messagePlaceholder': 'Tell me about your project...',
+            'contact.send': 'Send Message',
+            'footer.copy': '© 2025 FarleYDev. All rights reserved.',
+            'footer.tagline': 'Built with precision.'
+        }
+    };
+    
+    let currentLang = localStorage.getItem('lang') || 'en-us';
+    
+    function initTranslation() {
+        const langToggle = document.getElementById('langToggle');
+        const langCode = langToggle?.querySelector('.lang-code');
+        
+        if (langToggle && langCode) {
+            updateLangButton(langCode);
+            applyTranslations();
+            
+            langToggle.addEventListener('click', () => {
+                currentLang = currentLang === 'en-us' ? 'pt-br' : 'en-us';
+                localStorage.setItem('lang', currentLang);
+                updateLangButton(langCode);
+                applyTranslations();
+            });
+        }
+    }
+    
+    function updateLangButton(langCode) {
+        langCode.textContent = currentLang === 'en-us' ? 'PT' : 'EN';
+    }
+    
+    function applyTranslations() {
+        const lang = translations[currentLang];
+        if (!lang) return;
+        
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (lang[key]) {
+                el.textContent = lang[key];
+            }
+        });
+        
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (lang[key]) {
+                el.placeholder = lang[key];
+            }
+        });
+        
+        document.documentElement.lang = currentLang === 'pt-br' ? 'pt-BR' : 'en-US';
     }
 })();

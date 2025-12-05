@@ -245,6 +245,33 @@ img {
     width: 100%;
 }
 
+.lang-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-left: 20px;
+}
+
+.lang-toggle:hover {
+    border-color: var(--accent);
+    background: rgba(0, 212, 255, 0.05);
+}
+
+.lang-code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
 .nav-toggle {
     display: none;
     flex-direction: column;
