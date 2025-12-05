@@ -12,6 +12,8 @@ A professional portfolio website for Farley, a Full-Stack Developer and Software
 - JetBrains Mono for code/headings, Inter for body text
 - Simplified JavaScript for navigation and contact form
 - Removed old carousel system in favor of card-based project grid
+- Added Netlify Functions for serverless backend deployment
+- Integrated Neon PostgreSQL database for leaderboard
 
 ## User Preferences
 
@@ -83,6 +85,27 @@ A professional portfolio website for Farley, a Full-Stack Developer and Software
 - Twitter/X cards (`@gomezfy_`)
 - Open Graph protocol for link previews
 
+## Netlify Deployment
+
+The project includes Netlify Functions for serverless backend:
+
+**Functions** (`netlify/functions/`):
+- `leaderboard.js`: GET endpoint to fetch top 10 scores
+- `score.js`: POST endpoint to save player scores
+
+**Configuration** (`netlify.toml`):
+- Redirects `/api/leaderboard` → `/.netlify/functions/leaderboard`
+- Redirects `/api/score` → `/.netlify/functions/score`
+
+**Environment Variables Required on Netlify**:
+- `NETLIFY_DATABASE_URL` or `NEON_DATABASE_URL`: PostgreSQL connection string
+
+**Deploy Steps**:
+1. Push code to GitHub
+2. Connect repository to Netlify
+3. Set `NETLIFY_DATABASE_URL` in Netlify environment variables (copy from Neon dashboard)
+4. Deploy
+
 ## File Structure
 
 ```
@@ -90,12 +113,18 @@ A professional portfolio website for Farley, a Full-Stack Developer and Software
 ├── index.html          # Main HTML page
 ├── assets/
 │   ├── style.css       # Main stylesheet (dark theme)
-│   ├── main.js         # Navigation and contact form JS
+│   ├── main.js         # Navigation, game and contact form JS
 │   ├── farley-profile.jpeg
 │   ├── sheriff-rex.png
 │   ├── emoji-size-logo.png
 │   └── orbital-bot-logo.png
-├── server.py           # Python HTTP server with contact API
+├── netlify/
+│   └── functions/
+│       ├── leaderboard.js  # Netlify Function for leaderboard API
+│       └── score.js        # Netlify Function for score API
+├── netlify.toml        # Netlify configuration with redirects
+├── package.json        # Node.js dependencies for Netlify Functions
+├── server.py           # Python HTTP server (for Replit)
 ├── pyproject.toml      # Python dependencies
 └── replit.md           # This documentation
 ```
