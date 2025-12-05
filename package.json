@@ -1,0 +1,15 @@
+{
+  "name": "farley-portfolio",
+  "version": "1.0.0",
+  "description": "Farley Gomez Portfolio with Space Shooter Game",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'No build step required'"
+  },
+  "dependencies": {
+    "pg": "^8.11.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
