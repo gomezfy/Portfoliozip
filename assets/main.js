@@ -86,6 +86,37 @@
     let gameRunning = true;
     let loadingProgress = 0;
     let frame = 0;
+    let leaderboard = [];
+    let showingNameInput = false;
+    
+    async function fetchLeaderboard() {
+        try {
+            const response = await fetch('/api/leaderboard');
+            if (response.ok) {
+                leaderboard = await response.json();
+            }
+        } catch (e) {
+            console.log('Leaderboard não disponível');
+        }
+    }
+    
+    async function saveScore(playerName, playerScore) {
+        try {
+            const response = await fetch('/api/score', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: playerName, score: playerScore })
+            });
+            if (response.ok) {
+                const data = await response.json();
+                leaderboard = data.leaderboard || [];
+            }
+        } catch (e) {
+            console.log('Erro ao salvar score');
+        }
+    }
+    
+    fetchLeaderboard();
     
     for (let i = 0; i < 30; i++) {
         stars.push({
@@ -221,10 +252,21 @@
         ctx.font = '10px monospace';
         ctx.fillText('SCORE:' + String(score).padStart(5, '0'), 5, 12);
         
-        ctx.fillStyle = '#666666';
-        ctx.fillText(Math.min(100, Math.floor(loadingProgress)) + '%', canvas.width - 30, 12);
+        if (leaderboard.length > 0) {
+            ctx.fillStyle = '#ffff00';
+            ctx.font = '8px monospace';
+            ctx.fillText('TOP 5', canvas.width - 70, 12);
+            
+            ctx.fillStyle = '#888888';
+            for (let i = 0; i < Math.min(5, leaderboard.length); i++) {
+                const entry = leaderboard[i];
+                const name = entry.name.substring(0, 8);
+                const scoreText = String(entry.score).padStart(5, '0');
+                ctx.fillText(`${i+1}.${name}:${scoreText}`, canvas.width - 95, 22 + (i * 10));
+            }
+        }
         
-        ctx.strokeStyle = '#333333';
+        ctx.strokeStyle = '#00ff00';
         ctx.strokeRect(0, 0, canvas.width, canvas.height);
     }
     
@@ -318,11 +360,66 @@
         gameRunning = false;
         loadingProgress = 100;
         playDeathSound();
+        showingNameInput = true;
         
         setTimeout(() => {
+            showNameInputDialog();
+        }, 500);
+    }
+    
+    function showNameInputDialog() {
+        const finalScore = score;
+        
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: flex; align-items: center;
+            justify-content: center; z-index: 10000; font-family: monospace;
+        `;
+        
+        overlay.innerHTML = `
+            <div style="background: #111; border: 2px solid #00ff00; padding: 30px; text-align: center; max-width: 320px;">
+                <h2 style="color: #ff0000; margin: 0 0 10px; font-size: 24px;">GAME OVER</h2>
+                <p style="color: #00ff00; font-size: 28px; margin: 10px 0;">SCORE: ${String(finalScore).padStart(5, '0')}</p>
+                <p style="color: #888; margin: 20px 0 10px;">Digite seu nome para o ranking:</p>
+                <input type="text" id="playerNameInput" maxlength="20" placeholder="Seu nome" 
+                    style="background: #000; border: 1px solid #00ff00; color: #00ff00; 
+                    padding: 10px; font-size: 16px; width: 200px; text-align: center; font-family: monospace;">
+                <br>
+                <button id="saveScoreBtn" style="background: #00ff00; color: #000; border: none;
+                    padding: 10px 30px; font-size: 16px; cursor: pointer; margin-top: 15px; font-family: monospace;">
+                    SALVAR
+                </button>
+                <button id="skipScoreBtn" style="background: #333; color: #888; border: none;
+                    padding: 10px 20px; font-size: 14px; cursor: pointer; margin-top: 10px; margin-left: 10px; font-family: monospace;">
+                    PULAR
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        const input = document.getElementById('playerNameInput');
+        const saveBtn = document.getElementById('saveScoreBtn');
+        const skipBtn = document.getElementById('skipScoreBtn');
+        
+        input.focus();
+        
+        async function finishAndContinue(shouldSave) {
+            if (shouldSave) {
+                const playerName = input.value.trim() || 'Anônimo';
+                await saveScore(playerName, finalScore);
+            }
+            overlay.remove();
             loadingScreen.classList.add('hidden');
             initPortfolio();
-        }, 800);
+        }
+        
+        saveBtn.addEventListener('click', () => finishAndContinue(true));
+        skipBtn.addEventListener('click', () => finishAndContinue(false));
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') finishAndContinue(true);
+        });
     }
     
     function draw() {

@@ -36,13 +36,18 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 36097
-externalPort = 3002
-
-[[ports]]
 localPort = 36821
 externalPort = 3000
 
 [[ports]]
+localPort = 41579
+externalPort = 3002
+
+[[ports]]
 localPort = 43097
 externalPort = 3001
+
+[userenv]
+
+[userenv.shared]
+NEON_DATABASE_URL = "postgresql://neondb_owner:npg_RBWH4iT0Sbqa@ep-rapid-feather-aeumggqj-pooler.c-2.us-east-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require"
