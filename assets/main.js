@@ -69,6 +69,41 @@
         osc2.stop(audioCtx.currentTime + 0.8);
     }
     
+    function playBossExplosionSound() {
+        if (!audioCtx) return;
+        for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200 - i * 50, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.5);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                osc.start(audioCtx.currentTime);
+                osc.stop(audioCtx.currentTime + 0.5);
+            }, i * 150);
+        }
+    }
+    
+    function playBossWarningSound() {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(220, audioCtx.currentTime + 0.2);
+        osc.frequency.setValueAtTime(440, audioCtx.currentTime + 0.4);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.01, audioCtx.currentTime + 0.6);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.6);
+    }
+    
     const ship = {
         x: 10,
         y: canvas.height / 2 - 6,
@@ -88,6 +123,14 @@
     let frame = 0;
     let leaderboard = [];
     let showingNameInput = false;
+    
+    let currentPhase = 1;
+    let enemiesKilledInPhase = 0;
+    let enemiesToKillForBoss = 10;
+    let boss = null;
+    let bossActive = false;
+    let phaseTransition = false;
+    let phaseTransitionTimer = 0;
     
     async function fetchLeaderboard() {
         try {
@@ -128,10 +171,13 @@
     }
     
     function spawnEnemy() {
+        if (bossActive || phaseTransition) return;
+        
+        const speedMod = 1 + (currentPhase - 1) * 0.15;
         const types = [
-            { width: 12, height: 10, points: 10, speed: 1.5, pattern: 'straight' },
-            { width: 14, height: 12, points: 20, speed: 1, pattern: 'wave' },
-            { width: 16, height: 14, points: 30, speed: 0.8, pattern: 'zigzag' }
+            { width: 12, height: 10, points: 10 * currentPhase, speed: 1.5 * speedMod, pattern: 'straight' },
+            { width: 14, height: 12, points: 20 * currentPhase, speed: 1 * speedMod, pattern: 'wave' },
+            { width: 16, height: 14, points: 30 * currentPhase, speed: 0.8 * speedMod, pattern: 'zigzag' }
         ];
         const type = types[Math.floor(Math.random() * types.length)];
         enemies.push({
@@ -139,8 +185,69 @@
             y: 15 + Math.random() * (canvas.height - 40),
             ...type,
             startY: 0,
-            phase: Math.random() * Math.PI * 2
+            phase: Math.random() * Math.PI * 2,
+            isBoss: false
         });
+    }
+    
+    function spawnBoss() {
+        playBossWarningSound();
+        bossActive = true;
+        
+        const bossHealth = 5 + currentPhase * 3;
+        boss = {
+            x: canvas.width + 10,
+            y: canvas.height / 2 - 25,
+            width: 40,
+            height: 50,
+            speed: 0.5,
+            health: bossHealth,
+            maxHealth: bossHealth,
+            points: 100 * currentPhase,
+            pattern: 'boss',
+            phase: 0,
+            isBoss: true,
+            targetY: canvas.height / 2 - 25,
+            shootTimer: 0
+        };
+    }
+    
+    function drawBoss() {
+        if (!boss) return;
+        const x = Math.floor(boss.x);
+        const y = Math.floor(boss.y);
+        
+        const flash = boss.health < boss.maxHealth && frame % 4 < 2;
+        
+        ctx.fillStyle = flash ? '#ffffff' : '#ff0066';
+        ctx.fillRect(x + 10, y + 5, 20, 40);
+        ctx.fillRect(x + 5, y + 10, 30, 30);
+        ctx.fillRect(x, y + 15, 40, 20);
+        
+        ctx.fillStyle = flash ? '#ffaaaa' : '#aa0044';
+        ctx.fillRect(x + 15, y, 10, 10);
+        ctx.fillRect(x + 15, y + 40, 10, 10);
+        
+        ctx.fillStyle = '#ffff00';
+        ctx.fillRect(x + 5, y + 20, 6, 6);
+        ctx.fillRect(x + 5, y + 28, 6, 6);
+        
+        if (frame % 6 < 3) {
+            ctx.fillStyle = '#ff6600';
+            ctx.fillRect(x + 40, y + 22, 5, 6);
+        }
+        
+        const healthWidth = 36;
+        const healthHeight = 4;
+        const healthX = x + 2;
+        const healthY = y - 8;
+        
+        ctx.fillStyle = '#333';
+        ctx.fillRect(healthX, healthY, healthWidth, healthHeight);
+        
+        const healthPercent = boss.health / boss.maxHealth;
+        ctx.fillStyle = healthPercent > 0.5 ? '#00ff00' : healthPercent > 0.25 ? '#ffff00' : '#ff0000';
+        ctx.fillRect(healthX, healthY, healthWidth * healthPercent, healthHeight);
     }
     
     function shoot() {
@@ -252,21 +359,48 @@
         ctx.font = '10px monospace';
         ctx.fillText('SCORE:' + String(score).padStart(5, '0'), 5, 12);
         
-        if (leaderboard.length > 0) {
-            ctx.fillStyle = '#ffff00';
-            ctx.font = '8px monospace';
-            ctx.fillText('TOP 5', canvas.width - 70, 12);
-            
-            ctx.fillStyle = '#888888';
-            for (let i = 0; i < Math.min(5, leaderboard.length); i++) {
-                const entry = leaderboard[i];
-                const name = entry.name.substring(0, 8);
-                const scoreText = String(entry.score).padStart(5, '0');
-                ctx.fillText(`${i+1}.${name}:${scoreText}`, canvas.width - 95, 22 + (i * 10));
+        ctx.fillStyle = '#00ffff';
+        ctx.fillText('FASE ' + currentPhase, 5, 24);
+        
+        if (!bossActive && !phaseTransition) {
+            const progress = Math.min(enemiesKilledInPhase / enemiesToKillForBoss, 1);
+            ctx.fillStyle = '#333';
+            ctx.fillRect(5, 28, 50, 4);
+            ctx.fillStyle = '#ff6600';
+            ctx.fillRect(5, 28, 50 * progress, 4);
+        }
+        
+        if (bossActive) {
+            ctx.fillStyle = '#ff0066';
+            ctx.font = '10px monospace';
+            if (frame % 30 < 15) {
+                ctx.fillText('!! BOSS !!', 5, 38);
             }
         }
         
-        ctx.strokeStyle = '#00ff00';
+        if (phaseTransition) {
+            ctx.fillStyle = '#00ff00';
+            ctx.font = '12px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('FASE ' + (currentPhase + 1) + ' !', canvas.width / 2, canvas.height / 2);
+            ctx.textAlign = 'left';
+        }
+        
+        if (leaderboard.length > 0 && !bossActive) {
+            ctx.fillStyle = '#ffff00';
+            ctx.font = '8px monospace';
+            ctx.fillText('TOP 3', canvas.width - 70, 12);
+            
+            ctx.fillStyle = '#888888';
+            for (let i = 0; i < Math.min(3, leaderboard.length); i++) {
+                const entry = leaderboard[i];
+                const name = entry.name.substring(0, 6);
+                const scoreText = String(entry.score).padStart(5, '0');
+                ctx.fillText(`${i+1}.${name}:${scoreText}`, canvas.width - 85, 22 + (i * 10));
+            }
+        }
+        
+        ctx.strokeStyle = bossActive ? '#ff0066' : '#00ff00';
         ctx.strokeRect(0, 0, canvas.width, canvas.height);
     }
     
@@ -332,10 +466,71 @@
                     );
                     playExplosionSound();
                     score += enemies[j].points;
+                    enemiesKilledInPhase++;
                     bullets.splice(i, 1);
                     enemies.splice(j, 1);
+                    
+                    if (!bossActive && enemiesKilledInPhase >= enemiesToKillForBoss) {
+                        spawnBoss();
+                    }
                     break;
                 }
+            }
+        }
+        
+        if (boss) {
+            if (boss.x > canvas.width - 60) {
+                boss.x -= boss.speed;
+            } else {
+                boss.phase += 0.03;
+                boss.targetY = canvas.height / 2 + Math.sin(boss.phase) * (canvas.height / 3 - 30);
+                if (boss.y < boss.targetY) boss.y += 1;
+                else if (boss.y > boss.targetY) boss.y -= 1;
+            }
+            
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                if (bullets[i].x < boss.x + boss.width &&
+                    bullets[i].x + bullets[i].width > boss.x &&
+                    bullets[i].y < boss.y + boss.height &&
+                    bullets[i].y + bullets[i].height > boss.y) {
+                    boss.health--;
+                    bullets.splice(i, 1);
+                    playExplosionSound();
+                    
+                    if (boss.health <= 0) {
+                        for (let e = 0; e < 5; e++) {
+                            createExplosion(
+                                boss.x + Math.random() * boss.width,
+                                boss.y + Math.random() * boss.height
+                            );
+                        }
+                        playBossExplosionSound();
+                        score += boss.points;
+                        boss = null;
+                        bossActive = false;
+                        phaseTransition = true;
+                        phaseTransitionTimer = 120;
+                    }
+                }
+            }
+            
+            if (boss && ship.x < boss.x + boss.width &&
+                ship.x + ship.width > boss.x &&
+                ship.y < boss.y + boss.height &&
+                ship.y + ship.height > boss.y) {
+                createExplosion(ship.x + ship.width / 2, ship.y + ship.height / 2);
+                playerDied();
+                return;
+            }
+        }
+        
+        if (phaseTransition) {
+            phaseTransitionTimer--;
+            if (phaseTransitionTimer <= 0) {
+                currentPhase++;
+                enemiesKilledInPhase = 0;
+                enemiesToKillForBoss = 10 + currentPhase * 2;
+                phaseTransition = false;
             }
         }
         
@@ -436,9 +631,14 @@
         bullets.forEach(drawBullet);
         
         enemies.forEach((enemy, i) => {
-            const type = enemy.points === 10 ? 0 : enemy.points === 20 ? 1 : 2;
+            const basePoints = Math.round(enemy.points / currentPhase);
+            const type = basePoints === 10 ? 0 : basePoints === 20 ? 1 : 2;
             drawPixelEnemy(enemy, type);
         });
+        
+        if (boss) {
+            drawBoss();
+        }
         
         explosions.forEach(drawExplosion);
         
