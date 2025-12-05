@@ -9,6 +9,66 @@
     
     const PIXEL = isMobile ? 2 : 3;
     
+    let audioCtx = null;
+    
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+    
+    function playShootSound() {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(220, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.1);
+    }
+    
+    function playExplosionSound() {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.3);
+    }
+    
+    function playDeathSound() {
+        if (!audioCtx) return;
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc1.type = 'sawtooth';
+        osc2.type = 'square';
+        osc1.frequency.setValueAtTime(300, audioCtx.currentTime);
+        osc1.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.8);
+        osc2.frequency.setValueAtTime(200, audioCtx.currentTime);
+        osc2.frequency.exponentialRampToValueAtTime(15, audioCtx.currentTime + 0.8);
+        gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+        osc1.start(audioCtx.currentTime);
+        osc2.start(audioCtx.currentTime);
+        osc1.stop(audioCtx.currentTime + 0.8);
+        osc2.stop(audioCtx.currentTime + 0.8);
+    }
+    
     const ship = {
         x: 10,
         y: canvas.height / 2 - 6,
@@ -54,6 +114,8 @@
     
     function shoot() {
         if (bullets.length < 5) {
+            initAudio();
+            playShootSound();
             bullets.push({
                 x: ship.x + ship.width,
                 y: ship.y + ship.height / 2 - 1,
@@ -226,6 +288,7 @@
                         enemies[j].x + enemies[j].width / 2,
                         enemies[j].y + enemies[j].height / 2
                     );
+                    playExplosionSound();
                     score += enemies[j].points;
                     bullets.splice(i, 1);
                     enemies.splice(j, 1);
@@ -254,6 +317,7 @@
     function playerDied() {
         gameRunning = false;
         loadingProgress = 100;
+        playDeathSound();
         
         setTimeout(() => {
             loadingScreen.classList.add('hidden');
