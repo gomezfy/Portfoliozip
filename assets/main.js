@@ -234,9 +234,31 @@
             }
         }
         
+        for (let i = enemies.length - 1; i >= 0; i--) {
+            const enemy = enemies[i];
+            if (ship.x < enemy.x + enemy.width &&
+                ship.x + ship.width > enemy.x &&
+                ship.y < enemy.y + enemy.height &&
+                ship.y + ship.height > enemy.y) {
+                createExplosion(ship.x + ship.width / 2, ship.y + ship.height / 2);
+                playerDied();
+                return;
+            }
+        }
+        
         if (frame % 60 === 0 || (frame % 40 === 0 && score > 50)) {
             spawnEnemy();
         }
+    }
+    
+    function playerDied() {
+        gameRunning = false;
+        loadingProgress = 100;
+        
+        setTimeout(() => {
+            loadingScreen.classList.add('hidden');
+            initPortfolio();
+        }, 800);
     }
     
     function draw() {
@@ -326,14 +348,6 @@
     }, 100);
     
     window.addEventListener('load', () => {
-        setTimeout(() => {
-            loadingProgress = 100;
-            setTimeout(() => {
-                gameRunning = false;
-                loadingScreen.classList.add('hidden');
-                initPortfolio();
-            }, 500);
-        }, 3000);
     });
     
     function initPortfolio() {
